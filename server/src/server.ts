@@ -2,14 +2,21 @@ import express from 'express'
 
 const app = express()
 
+/* 
+    Query: ?page=2&sort=title
+    Route: /ads/{id}, /posts/como-criar-api-em-node
+    Body: safe and sensible info
+*/
+
+// Listagem de games com contagem de anúncios
 app.get('/games', (request, response) => {
     return response.json([])
 })
-
+// Criação de novo anúncio
 app.post('/ads', (request, response) => {
     return response.status(201).json([])
 })
-
+// Listagem de anúncios por game
 app.get('/games/:id/ads', (request, response) => {
     const gameId = request.params.id;
     
@@ -20,7 +27,7 @@ app.get('/games/:id/ads', (request, response) => {
         { id: 4, name: 'Anuncio 4' },
     ]);
 })
-
+// Buscar discord pelo ID do anúncio
 app.get('/ads/:id/discord', (request, response) => {
     const adId = request.params.id;
     
