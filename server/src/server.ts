@@ -2,6 +2,7 @@ import express from 'express'
 import { PrismaClient } from "@prisma/client";
 
 const app = express()
+app.use(express.json)
 const prisma = new PrismaClient({
     log: ['query']
 })
@@ -29,7 +30,24 @@ app.get('/games', async (request, response) => {
 })
 
 // Creation new ad
-app.post('/ads', (request, response) => {
+app.post('/games/:id/ads', async (request, response) => {
+    const gameId = request.params.id
+    const body = request.body;
+
+    const ad = await prisma.ad.create({
+        data: {
+            gameId,
+            name: body.name,
+            yearsPlaying: body.yearsPlaying,
+            discord: body.discord,
+            weekDays: body.weekDays.join(','),
+            hourStart: body.hourStart,
+            hourEnd: body.hourEnd,
+            useVoiceChannel: body.useVoiceChannel,
+            createdAt: body.createdAt,
+        }
+    })
+
     return response.status(201).json([])
 })
 
