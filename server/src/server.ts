@@ -1,8 +1,14 @@
 import express from 'express'
+import cors from 'cors'
 import { PrismaClient } from "@prisma/client";
 
+import { convertHourStringToMinutes } from "./utils/convert-hour-string-to-minutes";
+import { convertMinutesToHourString } from './utils/convert-minutes-to-hour-string';
+
 const app = express()
-app.use(express.json)
+app.use(express.json())
+app.use(cors())
+
 const prisma = new PrismaClient({
     log: ['query']
 })
@@ -13,7 +19,7 @@ const prisma = new PrismaClient({
     Body: safe and sensible info
 */
 
-// List games with ads counting
+// List games with ads counter
 app.get('/games', async (request, response) => {
     const games = await prisma.game.findMany({
         include: {
@@ -32,7 +38,7 @@ app.get('/games', async (request, response) => {
 // Creation new ad
 app.post('/games/:id/ads', async (request, response) => {
     const gameId = request.params.id
-    const body = request.body;
+    const body: any = request.body;
 
     const ad = await prisma.ad.create({
         data: {
@@ -41,14 +47,14 @@ app.post('/games/:id/ads', async (request, response) => {
             yearsPlaying: body.yearsPlaying,
             discord: body.discord,
             weekDays: body.weekDays.join(','),
-            hourStart: body.hourStart,
-            hourEnd: body.hourEnd,
+            hourStart: convertHourStringToMinutes(body.hourStart),
+            hourEnd: convertHourStringToMinutes(body.hourEnd),
             useVoiceChannel: body.useVoiceChannel,
             createdAt: body.createdAt,
         }
     })
 
-    return response.status(201).json([])
+    return response.status(201).json(ad)
 })
 
 // List ads by game
@@ -77,8 +83,10 @@ app.get('/games/:id/ads', async (request, response) => {
     // format before return
     return response.json(ads.map(ad => {
         return {
-            ...ads,
-            weekDays: ad.weekDays.split(',')
+            ...ad,
+            weekDays: ad.weekDays.split(','),
+            hourStart: convertMinutesToHourString(ad.hourStart),
+            hourEnd: convertMinutesToHourString(ad.hourEnd),
         }
     }));
 })
